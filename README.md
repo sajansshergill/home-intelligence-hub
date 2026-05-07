@@ -68,6 +68,17 @@ docker compose up --build
 
 The container regenerates synthetic data and starts Streamlit on `http://localhost:8501`.
 
+## Streamlit Community Cloud
+
+Use these settings when creating the app at Streamlit Community Cloud:
+
+- Repository: `sajansshergill/home-intelligence-hub`
+- Branch: `main`
+- Main file path: `dashboard/app.py`
+- Python version: `3.11`
+
+The app reads committed synthetic CSVs from `data/synthetic/`, so no secrets are required for the local demo dashboard.
+
 ## Optional Snowflake/dbt Path
 
 1. Copy the environment template:
