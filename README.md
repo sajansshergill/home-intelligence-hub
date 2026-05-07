@@ -1,97 +1,121 @@
-# 🏥 Home Care Intelligence Hub
+# Home Care Intelligence Hub
 
-A production-grade data pipeline and analytics platform simulating care coordination workflows for home health patients —— built on the modern data stack.
+A local-first analytics demo for home health referral operations. It simulates the path from hospital discharge referral to payor authorization to first completed home visit, then surfaces the metrics an operations director needs every week.
 
-## Problem Statement
-When a patient is discharged from a hospital and referrerd to home health care, three things must align: the **referral get accepted**, the **payor authorizes the visit**, and a **clinician shows up on time**. If any one of these breaks down, the patient goes without care.
+## What It Answers
 
-Most home health agencies track this across spreadsheets, EMR exports, and phone calls —— with no unified view of where referrals are stalling, which payors are slow to authorize, or which clinicians are over or underutilized.
-
-**This project builds the data foundation that answers the three questions an operations director asks every Monday morning:**
-1. Where are referrals dropping off? <em>(funnel leakage)
-2. Which payors are delaying authorizations —— and by how much? <em>(revenue risk)</em>
-3. Are we burning out our clinicians or leaving capacity on the table? <em>(workforce efficiency)</em>
+1. Where are referrals dropping off before the first visit?
+2. Which payors are delaying authorizations and creating revenue risk?
+3. Are clinicians over capacity, underutilized, or missing visits?
 
 ## Architecture
-<img width="361" height="596" alt="image" src="https://github.com/user-attachments/assets/85dbcb2d-898b-4f1e-8bc5-e33bb71f4a10" />
+
+```mermaid
+flowchart LR
+    generator[Synthetic Data Generator] --> csv[Local CSV Landing Zone]
+    csv --> streamlit[Streamlit Dashboard]
+    csv --> raw[Optional Snowflake RAW Schema]
+    raw --> dbt[dbt Transformations]
+    dbt --> marts[Analytics Marts]
+    marts --> streamlit
+    airflow[Airflow DAG] --> generator
+    airflow --> dbt
+```
+
+The default demo path is local CSV to Streamlit, so no warehouse credentials are required. The dbt and Airflow files document the production-style path for Snowflake-backed deployments.
 
 ## Tech Stack
-<img width="285" height="256" alt="image" src="https://github.com/user-attachments/assets/04e640fe-4692-4f26-a784-07b9d345bbc8" />
+
+- Python 3.11, pandas, Faker
+- Streamlit and Plotly for the dashboard
+- dbt + Snowflake for the optional warehouse transformation layer
+- Airflow DAG for orchestration
+- Pytest and GitHub Actions for validation
 
 ## Project Structure
-<img width="371" height="893" alt="image" src="https://github.com/user-attachments/assets/caae81aa-4cae-4e4a-8c92-3353ac49fe55" />
 
-## Data Model
-<img width="371" height="177" alt="image" src="https://github.com/user-attachments/assets/eb75f4a6-8bac-4411-9893-06fc250bfd10" />
+```text
+dashboard/                 Streamlit app, pages, and local metric helpers
+data/synthetic/            Generated CSV demo data
+dbt/                       Snowflake dbt project, sources, tests, and marts
+ingestion/airbyte/         Reference raw-load configuration
+orchestration/dags/        Airflow DAG for the daily pipeline
+scripts/                   Synthetic data generator
+tests/                     Generator and dashboard-metric tests
+```
 
-## Mart Models (Analytics Layer)
-mart_patient_referral_funnel Tracks patient progression from referral -> authorization -> first visit. Powers conversion rate analysis by referring provider and time period.
+## Local Quickstart
 
-mart_payor_authorization_lag Calculates business-day lag between authorization submission and approval, grouped by payor. Surfaces which insurers are creating the most delays and patient-risk exposure.
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python scripts/generate_synthetic_data.py
+streamlit run dashboard/app.py
+```
 
-mart_clinician_utilization Compares scheduled vs. completed visits against each clinician's weekly capacity. Flags over-utilization (burnout risk) and under-utilization (capacity opportunity).
+Open the Streamlit URL and use the sidebar pages:
+
+- `Referral Funnel`
+- `Payor Authorization Lag`
+- `Clinician Utilization`
+
+## Docker
+
+```bash
+docker compose up --build
+```
+
+The container regenerates synthetic data and starts Streamlit on `http://localhost:8501`.
+
+## Optional Snowflake/dbt Path
+
+1. Copy the environment template:
+
+```bash
+cp .env.example .env
+```
+
+2. Fill in Snowflake values in `.env`.
+3. Load `data/synthetic/*.csv` into the Snowflake `RAW` schema using your preferred loader or the reference Airbyte sketch in `ingestion/airbyte/connections.yaml`.
+4. Run dbt:
+
+```bash
+cd dbt
+dbt run --profiles-dir .
+dbt test --profiles-dir .
+```
+
+The dbt project builds:
+
+- `mart_patient_referral_funnel`
+- `mart_payor_authorization_lag`
+- `mart_clinician_utilization`
+
+## Airflow
+
+The DAG `home_care_daily_pipeline` is defined in `orchestration/dags/home_care_pipeline.py`. It is import-safe without Airflow installed, and in an Airflow environment it runs:
+
+```text
+generate_synthetic_data -> dbt_run -> dbt_test -> dashboard_ready
+```
 
 ## Data Quality
-All dbt models are covered by:
-- **Generic tests**: not_null, unique, accepted_values, relationships
-- **Custom tests**: visit completion rate floor, authorization lag outlier detection
-- **Elementary**: Row count anomaly monitoring with Slack alerting (simulated)
 
-## HIPAA Considerations
-⚠️ This project uses 100% synthetic data generated with the Faker library. No real patient data is used at any point.
+The repo includes:
 
-In a production environment with real PHI, the following controls would apply:
-<img width="585" height="274" alt="image" src="https://github.com/user-attachments/assets/15024468-2d69-4064-a827-598da7a13f40" />
+- dbt source declarations for the raw tables
+- generic dbt tests for keys, statuses, and required mart fields
+- pytest coverage for data generation and local dashboard mart logic
+- CI that generates a small dataset, runs pytest, compiles Python files, and builds the Docker image
 
-Columns that would requir masking in production: patient_name, date_of_birth, address, insurance_member_id.
+## HIPAA Note
 
-## Dashboard —— Key Metrics
-<img width="637" height="238" alt="image" src="https://github.com/user-attachments/assets/85744bc4-fbce-4782-a8b1-acddb76be4e2" />
-
-## Getting Started
-**Prerequisites**
-- Docker + Docker Compose
-- Snowflake account (free trial at snowflake.com)
-- Python 3.11+
-
-## Local Setup
-#### 1. Clone the repo
-git clone https://github.com/sajanshergill/home-care-intelligence-hub.git
-cd home-care-intelligence-hub
-
-#### 2. Copy environment variables
-cp .env.example .env
-##### Fill in your Snowflake credentials in .env
-
-#### 3. Generate synthetic data
-python scripts/generate_synthetic_data.py
-
-#### 4. Start services
-docker-compose up -d
-
-#### 5. Run dbt transformations
-cd dbt
-dbt deps
-dbt run
-dbt test
-
-#### 6. Launch dashboard
-cd ../dashboard
-streamlit run app.py
-
-## Running the Full Pipeline (Airflow)
-#### Airflow UI available at http://localhost:8080
-#### Username: admin | Password: admin (dev only)
-#### Trigger DAG: home_care_daily_pipeline
-
-## CI/CD
-GitHub Actions runs on every pull request to main:
-push to PR → lint (sqlfluff) → dbt compile → dbt test → pytest → build Docker image
+All data is synthetic and generated with Faker. No real patient data is used. In a production PHI environment, fields like date of birth, insurance member ID, address, and any patient identifiers would require masking, access controls, audit logging, and retention policies.
 
 ## Roadmap
 
-- Add real-time ingestion path via Kafka for visit status updates
-- Implement dbt incremental models for large referral history tables
-- Add ML-ready feature mart for authorization approval prediction
-- Integrate Elementary Cloud for hosted observability dashboard
-- Add data lineage visualization via dbt docs
+- Add an automated Snowflake CSV load script or dbt seed path.
+- Add incremental dbt models for larger referral histories.
+- Add dbt docs publishing and lineage artifacts.
+- Add a prediction-ready feature mart for authorization approval risk.

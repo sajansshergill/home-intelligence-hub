@@ -1,0 +1,11 @@
+payor_id,payor_name,payor_type,avg_auth_lag_days,requires_prior_auth,portal_url,created_at
+PAY-001,BlueCross BlueShield,Commercial,3,True,https://www.ramirez.com/,2024-06-29T19:43:37.840991
+PAY-002,Aetna,Commercial,4,False,http://www.russell-taylor.com/,2026-01-31T09:31:29.281710
+PAY-003,UnitedHealthcare,Commercial,5,False,http://reyes-mcfarland.com/,2020-11-27T12:35:04.585262
+PAY-004,Cigna,Commercial,4,False,http://christensen.info/,2021-02-19T18:00:03.920883
+PAY-005,Humana,Commercial,6,False,http://johnson.com/,2024-05-06T16:51:49.092015
+PAY-006,Medicaid - NJ,Government,10,False,https://www.anderson.com/,2022-10-10T08:36:20.950942
+PAY-007,Medicare FFS,Government,2,True,https://www.hernandez.com/,2025-09-01T07:41:17.744897
+PAY-008,Wellcare,Commercial,8,True,https://www.lozano-compton.org/,2022-12-10T22:11:04.879786
+PAY-009,Molina Healthcare,Commercial,9,True,http://shields.com/,2022-11-30T01:27:59.543792
+PAY-010,AmeriHealth,Commercial,5,False,http://www.carr.net/,2024-04-27T00:14:55.167660

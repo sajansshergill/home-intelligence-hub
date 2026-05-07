@@ -1,0 +1,22 @@
+# Reference Airbyte connection sketch for a Snowflake-backed deployment.
+# The local demo reads data/synthetic/*.csv directly and does not require Airbyte.
+
+source:
+  type: file
+  path: data/synthetic
+  streams:
+    - patients.csv
+    - clinicians.csv
+    - payors.csv
+    - referrals.csv
+    - payor_authorizations.csv
+    - visits.csv
+
+destination:
+  type: snowflake
+  database: HOME_CARE_INTELLIGENCE
+  schema: RAW
+
+sync:
+  mode: full_refresh_overwrite
+  schedule: manual

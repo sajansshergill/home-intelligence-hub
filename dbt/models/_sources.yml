@@ -1,0 +1,20 @@
+version: 2
+
+sources:
+  - name: raw
+    database: "{{ env_var('SNOWFLAKE_DATABASE', 'HOME_CARE_INTELLIGENCE') }}"
+    schema: "{{ env_var('SNOWFLAKE_RAW_SCHEMA', 'RAW') }}"
+    description: Synthetic raw landing tables for home care operations data.
+    tables:
+      - name: patients
+        description: Synthetic patient roster. PHI-like fields are fictional.
+      - name: clinicians
+        description: Synthetic clinician roster with weekly capacity.
+      - name: payors
+        description: Synthetic payor master data with expected authorization lag.
+      - name: referrals
+        description: Synthetic referral intake events.
+      - name: payor_authorizations
+        description: Synthetic payor authorization records.
+      - name: visits
+        description: Synthetic scheduled and completed visit records.

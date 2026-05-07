@@ -1,0 +1,10 @@
+services:
+  dashboard:
+    build: .
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./data:/app/data
+    command: >
+      sh -c "python scripts/generate_synthetic_data.py &&
+             streamlit run dashboard/app.py --server.address=0.0.0.0 --server.port=8501"

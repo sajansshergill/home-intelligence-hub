@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate synthetic data
+        run: python scripts/generate_synthetic_data.py --patients 100 --clinicians 10 --referrals 250 --seed 7
+
+      - name: Run tests
+        run: pytest
+
+      - name: Compile Python files
+        run: python -m compileall dashboard scripts tests orchestration
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: python
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build .

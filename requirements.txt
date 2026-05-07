@@ -1,0 +1,9 @@
+dbt-core
+dbt-snowflake
+faker
+pandas
+plotly
+pytest
+python-dotenv
+snowflake-connector-python
+streamlit
