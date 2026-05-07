@@ -73,7 +73,7 @@ left, right = st.columns([1, 1])
 with left:
     st.plotly_chart(
         px.funnel(stage_counts, x="count", y="stage", title="Referral Conversion Funnel"),
-        use_container_width=True,
+        width="stretch",
     )
 
 with right:
@@ -93,7 +93,7 @@ with right:
             title="End-to-End Conversion Trend",
             labels={"end_to_end_conversion_pct": "Conversion %", "referral_month": "Month"},
         ),
-        use_container_width=True,
+        width="stretch",
     )
 
 dropoffs = (
@@ -114,12 +114,12 @@ st.plotly_chart(
         barmode="group",
         title="Drop-Offs by Service Type",
     ),
-    use_container_width=True,
+    width="stretch",
 )
 
 st.subheader("Funnel Detail")
 st.dataframe(
     filtered.sort_values(["referral_month", "total_referrals"], ascending=[False, False]),
-    use_container_width=True,
+    width="stretch",
     hide_index=True,
 )

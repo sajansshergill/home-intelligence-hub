@@ -66,7 +66,7 @@ with left:
             title=f"Average Lag by Payor ({pd.Timestamp(latest_month):%b %Y})",
             labels={"payor_name": "Payor", "avg_lag_days": "Avg lag days"},
         ),
-        use_container_width=True,
+        width="stretch",
     )
 
 with right:
@@ -85,7 +85,7 @@ with right:
                 "sla_breach_rate_pct": "SLA breach %",
             },
         ),
-        use_container_width=True,
+        width="stretch",
     )
 
 monthly = (
@@ -101,12 +101,12 @@ st.plotly_chart(
         title="Lag Trend",
         labels={"value": "Days", "submitted_month": "Month", "variable": "Metric"},
     ),
-    use_container_width=True,
+    width="stretch",
 )
 
 st.subheader("Payor Detail")
 st.dataframe(
     filtered.sort_values(["submitted_month", "avg_lag_days"], ascending=[False, False]),
-    use_container_width=True,
+    width="stretch",
     hide_index=True,
 )

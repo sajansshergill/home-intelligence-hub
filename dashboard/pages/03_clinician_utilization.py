@@ -63,7 +63,7 @@ with left:
             title="Utilization Distribution",
             labels={"utilization_rate_pct": "Utilization %"},
         ),
-        use_container_width=True,
+        width="stretch",
     )
 
 with right:
@@ -76,7 +76,7 @@ with right:
             title="Top 20 Clinicians by Utilization",
             labels={"clinician_name": "Clinician", "utilization_rate_pct": "Utilization %"},
         ),
-        use_container_width=True,
+        width="stretch",
     )
 
 weekly_trend = (
@@ -97,12 +97,12 @@ st.plotly_chart(
         title="Weekly Workforce Trend",
         labels={"value": "Value", "scheduled_week": "Week", "variable": "Metric"},
     ),
-    use_container_width=True,
+    width="stretch",
 )
 
 st.subheader("Clinician Detail")
 st.dataframe(
     filtered.sort_values("utilization_rate_pct", ascending=False),
-    use_container_width=True,
+    width="stretch",
     hide_index=True,
 )
